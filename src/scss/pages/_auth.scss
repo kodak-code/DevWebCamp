@@ -1,3 +1,12 @@
-body {
-    background-color: red;
+@use 'base/mixins' as m;
+
+.auth {
+    @include m.contenedor-sm;
+    &__heading {
+        @include m.nombre-pagina;
+    }
+}
+
+.auth__texto {
+    font-size: 2rem;
 }
