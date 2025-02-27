@@ -1,7 +1,7 @@
 <?php 
 
 require_once __DIR__ . '/../includes/app.php';
-
+ini_set('display_errors', '1');
 use MVC\Router;
 use Controllers\AuthController;
 
