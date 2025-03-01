@@ -124,11 +124,27 @@ class ActiveRecord {
         return array_shift( $resultado ) ;
     }
 
+    //  Paginar los registros
+    public static function paginar($por_pagina, $offset) {
+        $query = "SELECT * FROM " . static::$tabla . " ORDER BY id DESC LIMIT $por_pagina OFFSET $offset";
+        $resultado = self::consultarSQL($query);
+        return $resultado ; // sin array_shift ya que son para 1 arreglo
+     }
+
     // Busqueda Where con Columna 
     public static function where($columna, $valor) {
         $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} = '${valor}'";
         $resultado = self::consultarSQL($query);
         return array_shift( $resultado ) ;
+    }
+
+    //Taer un total de registros
+    public static function total() {
+        $query = "SELECT COUNT(*) FROM " . static::$tabla;
+        $resultado = self::$db->query($query);
+        $total = $resultado->fetch_array();
+
+        return array_shift($total); //Lo saca del arreglo y trae el valor
     }
 
 // crea un nuevo registro
