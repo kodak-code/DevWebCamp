@@ -21,3 +21,7 @@ h3 {
 [class$="__heading"] { // que termine con heading 
     @include m.nombre-pagina;
 }
+
+[class$="__descripcion"] { // que termine con heading 
+    @include m.descripcion-pagina;
+}
