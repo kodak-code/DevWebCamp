@@ -12,6 +12,11 @@ class PonentesController
 
     public static function index(Router $router)
     {
+
+        if(!is_admin()) {
+            header('Location: /login');
+        }
+
         $pagina_actual = $_GET['page'];
         $pagina_actual = filter_var($pagina_actual, FILTER_VALIDATE_INT);
 
@@ -44,11 +49,20 @@ class PonentesController
     public static function crear(Router $router)
     {
 
+        if(!is_admin()) {
+            header('Location: /login');
+        }
+
         $alertas = [];
 
         $ponente = new Ponente;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if(!is_admin()) {
+                header('Location: /login');
+            }
+
             // Leer imagen
             if (!empty($_FILES['imagen']['tmp_name'])) {
 
@@ -99,7 +113,6 @@ class PonentesController
 
     public static function editar(Router $router)
     {
-
         $alertas = [];
 
         // Validar el id con el que vamos a editar 
@@ -120,6 +133,11 @@ class PonentesController
         $ponente->imagen_actual = $ponente->imagen;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if(!is_admin()) {
+                header('Location: /login');
+            }
+
             // Leer imagen
             if (!empty($_FILES['imagen']['tmp_name'])) {
 
@@ -169,8 +187,12 @@ class PonentesController
     }
 
     public static function eliminar() {
-        
+
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if(!is_admin()) {
+                header('Location: /login');
+            }
 
             $id = $_POST['id'];
 
