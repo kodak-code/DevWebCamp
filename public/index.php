@@ -67,5 +67,7 @@ $router->get('/devwebcamp', [PaginasController::class, 'evento']);
 $router->get('/paquetes', [PaginasController::class, 'paquetes']);
 $router->get('/workshops-conferencias', [PaginasController::class, 'conferencias']);
 
+// 404 ERROR
+$router->get('/404', [PaginasController::class, 'error']);
 
 $router->comprobarRutas();
