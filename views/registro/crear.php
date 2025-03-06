@@ -28,7 +28,7 @@
             </ul>
 
             <p class="paquete__precio">$199</p>
-            <a class="paquete__boton-paypal777">Ir a Conferencia</a>
+            <a id="botonQuiero" class="paquetes__submit">Pagar Paypal</a>
 
             <!-- EL QUE NO FUNCA ACTUAL
              <div class="paquete__botonpaypal">
@@ -53,6 +53,7 @@
             </ul>
 
             <p class="paquete__precio">$49</p>
+            <a id="botonQuiero2" class="paquetes__submit">Pagar Paypal</a>
 
         </div>
     </div>
@@ -60,13 +61,19 @@
 <!-- PARA SALVAR EL ERROR DE PAYPAL ACTUAL DEL CURSO -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const botonConferencia = document.querySelector(".paquete__boton-paypal777");
+        const botonConferencia = document.querySelector("#botonQuiero");
+        const botonConferencia2 = document.querySelector("#botonQuiero2");
 
         if (botonConferencia) {
             botonConferencia.addEventListener("click", function() {
                 window.location.href = "http://localhost:3000/finalizar-registro/conferencias";
             });
         }
+        // if (botonConferencia2) {
+        //     botonConferencia2.addEventListener("click", function() {
+        //         window.location.href = "http://localhost:3000/finalizar-registro/conferencias";
+        //     });
+        // }
     });
 </script>
 

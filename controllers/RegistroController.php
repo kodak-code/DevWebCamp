@@ -2,10 +2,17 @@
 
 namespace Controllers;
 
-use Model\Paquete;
-use Model\Registro;
-use Model\Usuario;
+use Model\Dia;
+use Model\Hora;
 use MVC\Router;
+use Model\Evento;
+use Model\Regalo;
+use Model\Paquete;
+use Model\Ponente;
+use Model\Usuario;
+use Model\Registro;
+use Model\Categoria;
+use Model\EventosRegistros;
 
 class RegistroController
 {
@@ -18,9 +25,16 @@ class RegistroController
 
         //Verificar si el usuario ya esta registrado
         $registro = Registro::where('usuario_id', $_SESSION['id']);
-        
-        if (isset($registro) && $registro->paquete_id === "3") {
+
+        if(isset($registro) && ($registro->paquete_id === "3" || $registro->paquete_id === "2" )) {
             header('Location: /boleto?id=' . urlencode($registro->token));
+            return;
+        }
+
+        // Redireccionar si ya pago
+        if (isset($registro) && $registro->paquete_id === "1") {
+            header('Location: /finalizar-registro/conferencias');
+            return;
         }
 
         $router->render('registro/crear', [
@@ -84,28 +98,29 @@ class RegistroController
             'registro' => $registro
         ]);
     }
-    public static function pagar(Router $router) {
+    public static function pagar(Router $router)
+    {
 
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if(!is_auth()) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!is_auth()) {
                 header('Location: /login');
                 return;
             }
 
             // Validar que Post no venga vacio
-            if(empty($_POST)) {
+            if (empty($_POST)) {
                 echo json_encode([]);
                 return;
             }
 
             // Crear el registro
             $datos = $_POST;
-            $datos['token'] = substr( md5(uniqid( rand(), true )), 0, 8);
+            $datos['token'] = substr(md5(uniqid(rand(), true)), 0, 8);
             $datos['usuario_id'] = $_SESSION['id'];
-            
+
             try {
                 $registro = new Registro($datos);
-          
+
                 $resultado = $registro->guardar();
                 echo json_encode($resultado);
             } catch (\Throwable $th) {
@@ -113,19 +128,137 @@ class RegistroController
                     'resultado' => 'error'
                 ]);
             }
-
         }
     }
 
     public static function conferencias(Router $router)
     {
-        if(!is_auth()) {
+        if (!is_auth()) {
             header('Location: /login');
             return;
         }
 
-        $router->render('registro/conferencia', [
-            'titulo' => 'Elige Workshops yConferencias'
+        // SE COMENTA YA QUE LA PARTE DE PAYPAL ACTUAL ES DISTINTO
+        // Validar que el usuario tenga el plan presencial 
+        $usuario_id = $_SESSION['id'];
+        $registro = Registro::where('usuario_id', $usuario_id);
+
+        if(isset($registro) && $registro->paquete_id === "2") {
+            header('Location: /boleto?id=' . urlencode($registro->token));
+            return;
+        }
+
+        if($registro->paquete_id !== "1") {
+            header('Location: /');
+        }
+
+        // Redireccionar a boleto virtual en caso de haber finalizado su registro
+        if(isset($registro->regalo_id) && $registro->paquete_id === "1") {
+            header('Location: /boleto?id=' . urlencode($registro->token));
+            return;
+        }
+
+        $eventos = Evento::ordenar('hora_id', 'ASC');
+
+        // formatear los eventos para mostrarlos segun dia y categoria
+        $eventos_formateados = [];
+        foreach ($eventos as $evento) {
+            // asignar al obj
+            $evento->categoria = Categoria::find($evento->categoria_id);
+            $evento->dia = Dia::find($evento->dia_id);
+            $evento->hora = Hora::find($evento->hora_id);
+            $evento->ponente = Ponente::find($evento->ponente_id);
+
+            // Viernes y es Conferencia
+            if ($evento->dia_id === "1" && $evento->categoria_id === "1") {
+                $eventos_formateados['conferencias_v'][] = $evento;
+            }
+            // Sabado y es Conferencia
+            if ($evento->dia_id === "2" && $evento->categoria_id === "1") {
+                $eventos_formateados['conferencias_s'][] = $evento;
+            }
+            // Viernes y es Workshop
+            if ($evento->dia_id === "1" && $evento->categoria_id === "2") {
+                $eventos_formateados['workshops_v'][] = $evento;
+            }
+            // Sabado y es Workshop
+            if ($evento->dia_id === "2" && $evento->categoria_id === "2") {
+                $eventos_formateados['workshops_s'][] = $evento;
+            }
+        }
+        $regalos = Regalo::all('ASC');
+
+        // Manejando el registro mediante $_POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            // Revisar que el usuario este autenticado
+            if (!is_auth()) {
+                header('Location: /login');
+                return;
+            }
+
+            $eventos = explode(',', $_POST['eventos']);
+            if (empty($eventos)) {
+                echo json_encode(['resultado' => false]);
+                return;
+            }
+
+            // Obtener el registro de usuario- DA ERROR PORQUE NO EM ANDA CON PAYPAL
+            $registro = Registro::where('usuario_id', $_SESSION['id']);
+            if (!isset($registro) || $registro->paquete_id !== "1") {
+                echo json_encode(['resultado' => false]);
+                return;
+            }
+
+            $eventos_array = [];
+            // Validar la disponibilidad de los eventos seleccionados
+            foreach ($eventos as $evento_id) {
+                $evento = Evento::find($evento_id);
+                // Comprobar que el evento exista
+                if (!isset($evento) || $evento->disponibles === "0") {
+                    echo json_encode(['resultado' => false]);
+                    return;
+                }
+                // si llega hasta aca es porque existe el evento y hay lugares disponibles
+                // se almacena en otra variable para evitar tantas consultas a la db
+                $eventos_array[] = $evento;
+            }
+
+            foreach ($eventos_array as $evento) {
+                $evento->disponibles -= 1;
+                $evento->guardar();
+
+                // Almacenar el registro RELACION M A M
+                $datos = [
+                    'evento_id' =>  (int) $evento->id,
+                    'registro_id' => (int)  $registro->id
+                ];
+
+                $registro_usuario = new EventosRegistros($datos);
+                $registro_usuario->guardar();
+            }
+
+            // Almacenar el regalo
+            $registro->sincronizar(['regalo_id' => $_POST['regalo_id']]);
+            $resultado = $registro->guardar();
+
+            if ($resultado) {
+                echo json_encode([
+                    'resultado' => $resultado,
+                    'token' => $registro->token
+                ]);
+            } else {
+                echo json_encode(['resultado' => false]);
+            }
+
+            return;
+        }
+
+
+        $router->render('registro/conferencias', [
+            'titulo' => 'Elige Workshops y Conferencias',
+            'eventos' => $eventos_formateados,
+            'regalos' => $regalos
         ]);
     }
 }

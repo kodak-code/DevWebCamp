@@ -54,32 +54,7 @@
             visibility: hidden;
         }
         
-    }
-    &__boton-paypal777 {
-        display: inline-block;
-        background-color: #ffc439; /* Color amarillo PayPal */
-        color: #111; /* Color de texto */
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        font-weight: bold;
-        text-decoration: none;
-        padding: 12px 24px;
-        border-radius: 6px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        text-align: center;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    &__boton-paypal777:hover {
-        background-color: #e0a800; /* Amarillo más oscuro */
-        transform: scale(1.05); /* Efecto de crecimiento */
-    }
-    
-    &__boton-paypal777:active {
-        background-color: #d39e00;
-        transform: scale(0.98);
-    }
-    
+    }    
     
 }
 
