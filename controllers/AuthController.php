@@ -11,6 +11,7 @@ class AuthController {
 
         $alertas = [];
 
+
         if($_SERVER['REQUEST_METHOD'] === 'POST') {
     
             $usuario = new Usuario($_POST);
@@ -34,7 +35,7 @@ class AuthController {
                         $_SESSION['email'] = $usuario->email;
                         $_SESSION['admin'] = $usuario->admin ?? null;
 
-                        // Redireccion
+                        // Redirección 
                         if($usuario->admin) {
                             header('Location: /admin/dashboard');
                         } else {

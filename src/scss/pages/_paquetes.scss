@@ -7,9 +7,18 @@
         @include m.contenedor;
         @include m.grid(1, 3rem);
         @include m.tablet {
+            @include m.grid(2, 3rem);
+            align-items: flex-start;
+        }
+        @include m.desktop {
             @include m.grid(3, 3rem);
             align-items: flex-start;
         }
+    }
+
+    &__submit {
+        @include m.boton(v.$azul, v.$blanco);
+        margin-top: 3rem
     }
 }
 
@@ -30,9 +39,53 @@
 
     &__precio {
         font-size: 6rem;
-        margin: 3rem 0 0 0;
+        margin: 3rem 0; // cambiar a 3rem 0 0 0para el actual
         color: v.$azul;
         font-weight: v.$black;
         text-align: center;
+    }
+    &__botonpaypal {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 100%;
+        padding: 0;
+        .item-header {
+            visibility: hidden;
+        }
+        
+    }
+    &__boton-paypal777 {
+        display: inline-block;
+        background-color: #ffc439; /* Color amarillo PayPal */
+        color: #111; /* Color de texto */
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        text-align: center;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    &__boton-paypal777:hover {
+        background-color: #e0a800; /* Amarillo más oscuro */
+        transform: scale(1.05); /* Efecto de crecimiento */
+    }
+    
+    &__boton-paypal777:active {
+        background-color: #d39e00;
+        transform: scale(0.98);
+    }
+    
+    
+}
+
+.paquete__botonpaypal div {
+    width: 100%; 
+    @include m.tablet {
+        margin-top: -.5rem;
     }
 }
